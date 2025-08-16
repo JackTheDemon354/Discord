@@ -1,0 +1,58 @@
+body {
+    font-family: Calibri, Comic Sans MS;
+    background-color: #f4f4f4;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    color: #333;
+}
+
+#chat {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 400px;
+    height: 300px;
+    overflow-y: auto;
+    margin: 10px auto;
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+#message {
+    width: 300px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 5px 10px;
+    margin-left: 5px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+input {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.notification {
+    color: green;
+    font-style: italic;
+}
+
+#my_code {
+    font-weight: bold;
+    margin: 10px 0;
+}
