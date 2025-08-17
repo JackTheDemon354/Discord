@@ -6,7 +6,7 @@ import string
 
 app = Flask(__name__, static_folder="../", static_url_path="")
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "SUPER_SECRET_KEY")
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 rooms = {}
 
@@ -16,6 +16,7 @@ def index():
 
 @socketio.on("create_room")
 def handle_create_room():
+    # Generate 6-character code instantly
     code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     rooms[code] = []
     send({"action":"room_created", "code": code}, room=request.sid)
