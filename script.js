@@ -1,38 +1,50 @@
 const socket = io();
 
+const chat = document.getElementById("chat");
+const input = document.getElementById("message");
+const sendBtn = document.getElementById("send");
+const createBtn = document.getElementById("create_room_btn");
+const joinBtn = document.getElementById("join_room_btn");
+const roomInput = document.getElementById("room_code_input");
+const myCodeDisplay = document.getElementById("my_code");
+
 let currentRoom = null;
 
-document.getElementById("create").onclick = () => {
-  socket.emit("create_room", {});
+createBtn.onclick = () => {
+    socket.emit("create_room");
 };
 
-document.getElementById("join").onclick = () => {
-  const code = document.getElementById("joinCode").value.trim();
-  socket.emit("join_room", { code });
+joinBtn.onclick = () => {
+    const code = roomInput.value.trim().toUpperCase();
+    if(code){
+        currentRoom = code;
+        socket.emit("join_room", {code});
+    }
 };
 
-document.getElementById("send").onclick = () => {
-  const msg = document.getElementById("messageInput").value.trim();
-  if (msg && currentRoom) {
-    socket.emit("send_message", { code: currentRoom, message: msg });
-    document.getElementById("messageInput").value = "";
-  }
+sendBtn.onclick = () => {
+    if(!currentRoom) return alert("Join or create a room first!");
+    const text = input.value.trim();
+    if(text){
+        socket.emit("message", {room: currentRoom, text});
+        input.value = "";
+    }
 };
 
-// --- SOCKET LISTENERS ---
-socket.on("room_created", (data) => {
-  currentRoom = data.code;
-  document.getElementById("roomCode").innerText = "Room Code: " + data.code;
-});
-
-socket.on("room_joined", (data) => {
-  currentRoom = data.code;
-  document.getElementById("roomCode").innerText = "Joined Room: " + data.code;
-});
-
-socket.on("receive_message", (data) => {
-  const chatBox = document.getElementById("chatBox");
-  const p = document.createElement("p");
-  p.innerText = data.message;
-  chatBox.appendChild(p);
+socket.on("message", msg => {
+    if(typeof msg === "object" && msg.action){
+        if(msg.action === "room_created"){
+            currentRoom = msg.code;
+            myCodeDisplay.textContent = "Your join code: " + currentRoom;
+        } else if(msg.action === "joined_room"){
+            myCodeDisplay.textContent = "Joined room: " + msg.code;
+        } else if(msg.action === "error"){
+            alert(msg.msg);
+        }
+    } else if(typeof msg === "string"){
+        const p = document.createElement("p");
+        p.textContent = msg;
+        chat.appendChild(p);
+        chat.scrollTop = chat.scrollHeight;
+    }
 });
