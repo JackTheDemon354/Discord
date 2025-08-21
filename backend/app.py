@@ -4,8 +4,8 @@ eventlet.monkey_patch()  # MUST be first
 import os
 import random
 import string
-from flask import Flask, render_template, send_from_directory
-from flask_socketio import SocketIO, send, join_room, leave_room
+from flask import Flask, render_template
+from flask_socketio import SocketIO, send, join_room
 
 # --- Flask app ---
 app = Flask(__name__, template_folder=".", static_folder=".")
@@ -15,14 +15,9 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "SUPER_SECRET_KEY")
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 active_rooms = {}  # room_code: list of usernames
 
-# --- Routes ---
 @app.route("/")
 def index():
-    return render_template("index.html")  # index.html in ROOT
-
-@app.route("/<path:path>")  # serve static files from ROOT
-def static_files(path):
-    return send_from_directory(".", path)
+    return render_template("index.html")  # index.html is in root
 
 # --- Socket.IO events ---
 @socketio.on("create_room")
@@ -51,11 +46,6 @@ def handle_message(msg):
     username = msg.get("username", "Guest")
     if room in active_rooms:
         send(f"{username}: {text}", room=room)
-
-@socketio.on("disconnect")
-def handle_disconnect():
-    # Optional: remove user from all rooms if tracking socket IDs
-    pass
 
 # --- Run server ---
 if __name__ == "__main__":
