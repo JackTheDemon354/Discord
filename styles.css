@@ -1,13 +1,105 @@
-body { font-family: Calibri, Comic Sans MS; padding: 20px; }
+/* Reset some default styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-#chat { border:1px solid #ccc; padding:10px; width:400px; height:300px; overflow-y:auto; margin-top:10px; }
+/* Body styling */
+body {
+    font-family: Calibri, Comic Sans MS;
+    padding: 20px;
+    background-color: #f0f2f5;
+}
 
-#message { width:300px; }
+/* Container for sidebar + main */
+#container {
+    display: flex;
+    gap: 20px;
+}
 
-button, input { margin:5px; }
+/* Sidebar */
+#sidebar {
+    width: 200px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 8px;
+    height: 500px;
+    overflow-y: auto;
+}
 
-#sidebar { float:left; width:150px; margin-right:20px; }
+#sidebar h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    text-align: center;
+}
 
-#main { float:left; }
+#sidebar ul {
+    list-style: none;
+}
 
-#controls, #message_area { margin-top:10px; }
+#sidebar li {
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Main chat area */
+#main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    height: 500px;
+}
+
+/* Chat messages */
+#chat {
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 350px;
+    overflow-y: auto;
+    border-radius: 5px;
+    background-color: #fafafa;
+}
+
+/* Input areas */
+#controls, #message_area {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+#username, #room_code_input, #message {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    flex: 1;
+}
+
+/* Buttons */
+button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* My room code display */
+#my_code {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
