@@ -1,11 +1,12 @@
 import os
 import random
 import string
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, request
 from flask_socketio import SocketIO, emit, join_room
 
 # --- Flask setup ---
-app = Flask(__name__, static_folder=".", static_url_path="")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # root dir
+app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "SUPER_SECRET_KEY")
 
 # --- Socket.IO setup ---
@@ -15,12 +16,12 @@ active_rooms = {}  # { room_code: [usernames...] }
 # --- Routes ---
 @app.route("/")
 def index():
-    return send_from_directory(".", "index.html")
+    return send_from_directory(BASE_DIR, "index.html")
 
 @app.route("/<path:path>")
 def static_files(path):
-    """Serve JS, CSS, and other static files from root."""
-    return send_from_directory(".", path)
+    """Serve JS, CSS, and other static files from project root."""
+    return send_from_directory(BASE_DIR, path)
 
 # --- Socket.IO Events ---
 @socketio.on("create_room")
