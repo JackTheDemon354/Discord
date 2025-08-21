@@ -1,19 +1,60 @@
-from flask import Flask, send_from_directory
-from flask_socketio import SocketIO, emit
 import os
+import random
+import string
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit, join_room
 
-app = Flask(__name__, static_folder=".", static_url_path="")
+# --- Flask app ---
+app = Flask(__name__, template_folder=".", static_folder=".")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "SUPER_SECRET_KEY")
+
+# --- Socket.IO setup ---
 socketio = SocketIO(app, cors_allowed_origins="*")
+active_rooms = {}  # { room_code: [usernames...] }
 
-@app.route('/')
+@app.route("/")
 def index():
-    return send_from_directory('.', 'index.html')
+    return render_template("index.html")  # index.html is in root
 
-@socketio.on('chat_message')
-def handle_chat_message(data):
-    # data is a dict: {"username": "Jack", "message": "Hello!"}
-    print(f"{data['username']}: {data['message']}")
-    emit('chat_message', data, broadcast=True)
+# --- Socket.IO events ---
 
-if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+@socketio.on("create_room")
+def create_room(data):
+    username = data.get("username", "Anonymous")
+    code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+    active_rooms[code] = [username]
+    join_room(code)
+
+    emit("message", {"action": "room_created", "code": code})
+    emit("message", f"{username} created the room.", room=code)
+
+
+@socketio.on("join_room")
+def join_chat(data):
+    code = data.get("code")
+    username = data.get("username", "Anonymous")
+
+    if code in active_rooms:
+        active_rooms[code].append(username)
+        join_room(code)
+        emit("message", {"action": "joined_room", "code": code}, room=request.sid)
+        emit("message", f"{username} joined the room.", room=code)
+    else:
+        emit("message", {"action": "error", "msg": "Room not found"}, room=request.sid)
+
+
+@socketio.on("message")
+def handle_message(msg):
+    room = msg.get("room")
+    username = msg.get("username", "Anonymous")
+    text = msg.get("text")
+
+    if room in active_rooms and text:
+        emit("message", {"username": username, "text": text}, room=room)
+
+
+# --- Run server ---
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host="0.0.0.0", port=port)
