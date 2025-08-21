@@ -1,22 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Chat-Time</title>
-<link rel="stylesheet" href="styles.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
-<script src="script.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat-Time</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-+m8j9dC2Lg6OCgyQWnLHXhD3QpGh0/ivRz4w+yz/+xiVgmsPp/hTT+mQlH0ErQ8B" crossorigin="anonymous"></script>
 </head>
 <body>
-<h1>Chat-Time</h1>
+    <div id="container">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <h3>Users in Room</h3>
+            <ul id="user_list"></ul>
+        </div>
 
-<button id="create_room_btn">Create Party</button>
-<input id="room_code_input" placeholder="Enter Party Code">
-<button id="join_room_btn">Join Party</button>
-<p id="my_code"></p>
+        <!-- Main chat area -->
+        <div id="main">
+            <div id="controls">
+                <button id="create_room_btn">Create Room</button>
+                <button id="join_room_btn">Join Room</button>
+                <input type="text" id="room_code_input" placeholder="Room Code">
+                <p id="my_code">Your join code will appear here</p>
+            </div>
 
-<div id="chat"></div>
-<input id="message" placeholder="Message your friend!">
-<button id="send">⌯⌲</button>
+            <div id="chat_container">
+                <div id="chat"></div>
+                <input type="text" id="message" placeholder="Type your message...">
+                <button id="send">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
