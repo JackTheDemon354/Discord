@@ -2,34 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat-Time</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-+m8j9dC2Lg6OCgyQWnLHXhD3QpGh0/ivRz4w+yz/+xiVgmsPp/hTT+mQlH0ErQ8B" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
-    <div id="container">
-        <!-- Sidebar -->
-        <div id="sidebar">
-            <h3>Users in Room</h3>
-            <ul id="user_list"></ul>
+    <div id="sidebar">
+        <h3>Users in Room</h3>
+        <ul id="users"></ul>
+    </div>
+    <div id="main">
+        <div id="chat"></div>
+        <div id="controls">
+            <input id="username" type="text" placeholder="Your username" />
+            <input id="room_code_input" type="text" placeholder="Room code" />
+            <button id="create_room_btn">Create Room</button>
+            <button id="join_room_btn">Join Room</button>
         </div>
-
-        <!-- Main chat area -->
-        <div id="main">
-            <div id="controls">
-                <button id="create_room_btn">Create Room</button>
-                <button id="join_room_btn">Join Room</button>
-                <input type="text" id="room_code_input" placeholder="Room Code">
-                <p id="my_code">Your join code will appear here</p>
-            </div>
-
-            <div id="chat_container">
-                <div id="chat"></div>
-                <input type="text" id="message" placeholder="Type your message...">
-                <button id="send">Send</button>
-            </div>
+        <div id="message_area">
+            <input id="message" type="text" placeholder="Type a message..." />
+            <button id="send">Send</button>
         </div>
+        <div id="my_code"></div>
     </div>
 
     <script src="script.js"></script>
