@@ -7,23 +7,31 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
-    <div id="sidebar">
-        <h3>Users in Room</h3>
-        <ul id="users"></ul>
-    </div>
-    <div id="main">
-        <div id="chat"></div>
-        <div id="controls">
-            <input id="username" type="text" placeholder="Your username" />
-            <input id="room_code_input" type="text" placeholder="Room code" />
-            <button id="create_room_btn">Create Room</button>
-            <button id="join_room_btn">Join Room</button>
+    <div id="container">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <h3>Users in Room</h3>
+            <ul id="users"></ul>
         </div>
-        <div id="message_area">
-            <input id="message" type="text" placeholder="Type a message..." />
-            <button id="send">Send</button>
+
+        <!-- Main chat area -->
+        <div id="main">
+            <div id="chat"></div>
+
+            <div id="controls">
+                <input id="username" type="text" placeholder="Your username" />
+                <input id="room_code_input" type="text" placeholder="Room code" />
+                <button id="create_room_btn">Create Room</button>
+                <button id="join_room_btn">Join Room</button>
+            </div>
+
+            <div id="message_area">
+                <input id="message" type="text" placeholder="Type a message..." />
+                <button id="send">Send</button>
+            </div>
+
+            <div id="my_code"></div>
         </div>
-        <div id="my_code"></div>
     </div>
 
     <script src="script.js"></script>
