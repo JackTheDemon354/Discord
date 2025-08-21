@@ -10,14 +10,9 @@ const myCodeDisplay = document.getElementById("my_code");
 const userList = document.getElementById("user_list");
 
 let currentRoom = null;
-let username = null;
+let username = prompt("Enter your username") || "Guest";
 
-// --- Ask for username on load ---
-window.onload = () => {
-    username = prompt("Enter your username:") || "Anonymous";
-};
-
-// --- Create room ---
+// --- Room creation ---
 createBtn.onclick = () => {
     socket.emit("create_room", { username });
 };
@@ -25,34 +20,49 @@ createBtn.onclick = () => {
 // --- Join room ---
 joinBtn.onclick = () => {
     const code = roomInput.value.trim().toUpperCase();
-    if (code) {
+    if(code){
         currentRoom = code;
         socket.emit("join_room", { code, username });
     }
 };
 
-// --- Send message ---
-sendBtn.onclick = () => {
-    if (!currentRoom) return alert("Join or create a room first!");
+// --- Send message function ---
+function sendMessage() {
+    if(!currentRoom) return alert("Join or create a room first!");
     const text = input.value.trim();
-    if (text) {
+    if(text){
         socket.emit("message", { room: currentRoom, text, username });
         input.value = "";
     }
-};
+}
 
-// --- Incoming messages ---
+// --- Send button click ---
+sendBtn.onclick = sendMessage;
+
+// --- Press Enter to send ---
+input.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") {
+        sendMessage();
+    }
+});
+
+// --- Handle incoming messages ---
 socket.on("message", msg => {
-    if (typeof msg === "object" && msg.action) {
-        if (msg.action === "room_created") {
+    if(typeof msg === "object" && msg.action){
+        if(msg.action === "room_created"){
             currentRoom = msg.code;
             myCodeDisplay.textContent = "Your join code: " + currentRoom;
-        } else if (msg.action === "joined_room") {
+            updateUserList(msg.users || []);
+        } else if(msg.action === "joined_room"){
+            currentRoom = msg.code;
             myCodeDisplay.textContent = "Joined room: " + msg.code;
-        } else if (msg.action === "error") {
+            updateUserList(msg.users || []);
+        } else if(msg.action === "update_users"){
+            updateUserList(msg.users || []);
+        } else if(msg.action === "error"){
             alert(msg.msg);
         }
-    } else if (typeof msg === "string") {
+    } else if(typeof msg === "string"){
         const p = document.createElement("p");
         p.textContent = msg;
         chat.appendChild(p);
@@ -60,12 +70,12 @@ socket.on("message", msg => {
     }
 });
 
-// --- Update sidebar users ---
-socket.on("update_users", users => {
-    userList.innerHTML = ""; // clear old list
+// --- Update sidebar user list ---
+function updateUserList(users) {
+    userList.innerHTML = "";
     users.forEach(u => {
         const li = document.createElement("li");
         li.textContent = u;
         userList.appendChild(li);
     });
-});
+}
