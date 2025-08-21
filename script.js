@@ -7,16 +7,15 @@ const createBtn = document.getElementById("create_room_btn");
 const joinBtn = document.getElementById("join_room_btn");
 const roomInput = document.getElementById("room_code_input");
 const myCodeDisplay = document.getElementById("my_code");
+const membersList = document.getElementById("members");
 
 let currentRoom = null;
-let username = prompt("Enter your name:") || "Anonymous";
+let username = prompt("Enter your username:") || "Anonymous";
 
-// --- Create Room ---
 createBtn.onclick = () => {
     socket.emit("create_room", { username });
 };
 
-// --- Join Room ---
 joinBtn.onclick = () => {
     const code = roomInput.value.trim().toUpperCase();
     if (code) {
@@ -25,7 +24,6 @@ joinBtn.onclick = () => {
     }
 };
 
-// --- Send Message ---
 sendBtn.onclick = () => {
     if (!currentRoom) return alert("Join or create a room first!");
     const text = input.value.trim();
@@ -35,7 +33,7 @@ sendBtn.onclick = () => {
     }
 };
 
-// --- Handle Incoming Messages ---
+// Handle messages
 socket.on("message", msg => {
     if (typeof msg === "object" && msg.action) {
         if (msg.action === "room_created") {
@@ -46,17 +44,20 @@ socket.on("message", msg => {
         } else if (msg.action === "error") {
             alert(msg.msg);
         }
-    } else if (typeof msg === "object" && msg.username && msg.text) {
-        const p = document.createElement("p");
-        p.textContent = `${msg.username}: ${msg.text}`;
-        chat.appendChild(p);
-        chat.scrollTop = chat.scrollHeight;
     } else if (typeof msg === "string") {
-        // System messages
         const p = document.createElement("p");
         p.textContent = msg;
-        p.style.fontStyle = "italic";
         chat.appendChild(p);
         chat.scrollTop = chat.scrollHeight;
     }
+});
+
+// Handle member list updates
+socket.on("members", members => {
+    membersList.innerHTML = "";
+    members.forEach(m => {
+        const li = document.createElement("li");
+        li.textContent = m;
+        membersList.appendChild(li);
+    });
 });
