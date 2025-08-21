@@ -1,37 +1,36 @@
 import os
 import random
 import string
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, send, join_room, leave_room, emit
+from flask import Flask, send_from_directory
+from flask_socketio import SocketIO, emit, join_room
 
-# --- Flask app ---
-app = Flask(__name__, template_folder=".", static_folder=".")
+# --- Flask setup ---
+app = Flask(__name__, static_folder=".", static_url_path="")
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "SUPER_SECRET_KEY")
 
 # --- Socket.IO setup ---
 socketio = SocketIO(app, cors_allowed_origins="*")
+active_rooms = {}  # { room_code: [usernames...] }
 
-# Active rooms: {code: [usernames]}
-active_rooms = {}
-# Track which user is tied to which socket id
-user_sessions = {}  # {sid: {"username": str, "room": str}}
-
+# --- Routes ---
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return send_from_directory(".", "index.html")
 
-# --- Socket.IO events ---
+@app.route("/<path:path>")
+def static_files(path):
+    """Serve JS, CSS, and other static files from root."""
+    return send_from_directory(".", path)
+
+# --- Socket.IO Events ---
 @socketio.on("create_room")
 def create_room(data):
     username = data.get("username", "Anonymous")
     code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-
     active_rooms[code] = [username]
-    user_sessions[request.sid] = {"username": username, "room": code}
-
     join_room(code)
-    send({"action": "room_created", "code": code}, room=request.sid)
-    emit("members", active_rooms[code], room=code)
+    emit("message", {"action": "room_created", "code": code}, room=request.sid)
+    emit("update_users", active_rooms[code], room=code)
 
 @socketio.on("join_room")
 def join_chat(data):
@@ -40,40 +39,19 @@ def join_chat(data):
 
     if code in active_rooms:
         active_rooms[code].append(username)
-        user_sessions[request.sid] = {"username": username, "room": code}
-
         join_room(code)
-        send({"action": "joined_room", "code": code}, room=request.sid)
-        emit("members", active_rooms[code], room=code)
+        emit("message", {"action": "joined_room", "code": code}, room=request.sid)
+        emit("update_users", active_rooms[code], room=code)
     else:
-        send({"action": "error", "msg": "Room not found"}, room=request.sid)
+        emit("message", {"action": "error", "msg": "Room not found"}, room=request.sid)
 
 @socketio.on("message")
 def handle_message(msg):
     room = msg.get("room")
-    username = msg.get("username", "Anonymous")
     text = msg.get("text")
-    if room in active_rooms and text:
+    username = msg.get("username", "Anonymous")
+    if room in active_rooms:
         emit("message", f"{username}: {text}", room=room)
-
-@socketio.on("disconnect")
-def handle_disconnect():
-    sid = request.sid
-    if sid in user_sessions:
-        info = user_sessions[sid]
-        username = info["username"]
-        room = info["room"]
-
-        if room in active_rooms and username in active_rooms[room]:
-            active_rooms[room].remove(username)
-
-            # If room is empty, delete it
-            if not active_rooms[room]:
-                del active_rooms[room]
-            else:
-                emit("members", active_rooms[room], room=room)
-
-        del user_sessions[sid]
 
 # --- Run server ---
 if __name__ == "__main__":
