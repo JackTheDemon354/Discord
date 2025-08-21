@@ -7,17 +7,22 @@ const createBtn = document.getElementById("create_room_btn");
 const joinBtn = document.getElementById("join_room_btn");
 const roomInput = document.getElementById("room_code_input");
 const myCodeDisplay = document.getElementById("my_code");
-const membersList = document.getElementById("members");
+const userList = document.getElementById("user_list");
 
 let currentRoom = null;
-let username = prompt("Enter your username:") || "Anonymous";
+let username = null;
 
-// --- Create Room ---
+// --- Ask for username on load ---
+window.onload = () => {
+    username = prompt("Enter your username:") || "Anonymous";
+};
+
+// --- Create room ---
 createBtn.onclick = () => {
     socket.emit("create_room", { username });
 };
 
-// --- Join Room ---
+// --- Join room ---
 joinBtn.onclick = () => {
     const code = roomInput.value.trim().toUpperCase();
     if (code) {
@@ -26,17 +31,17 @@ joinBtn.onclick = () => {
     }
 };
 
-// --- Send Message ---
+// --- Send message ---
 sendBtn.onclick = () => {
     if (!currentRoom) return alert("Join or create a room first!");
     const text = input.value.trim();
     if (text) {
-        socket.emit("message", { room: currentRoom, username, text });
+        socket.emit("message", { room: currentRoom, text, username });
         input.value = "";
     }
 };
 
-// --- Handle Messages from Server ---
+// --- Incoming messages ---
 socket.on("message", msg => {
     if (typeof msg === "object" && msg.action) {
         if (msg.action === "room_created") {
@@ -55,12 +60,12 @@ socket.on("message", msg => {
     }
 });
 
-// --- Update Members Sidebar ---
-socket.on("members", members => {
-    membersList.innerHTML = "";
-    members.forEach(m => {
+// --- Update sidebar users ---
+socket.on("update_users", users => {
+    userList.innerHTML = ""; // clear old list
+    users.forEach(u => {
         const li = document.createElement("li");
-        li.textContent = m;
-        membersList.appendChild(li);
+        li.textContent = u;
+        userList.appendChild(li);
     });
 });
