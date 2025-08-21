@@ -12,10 +12,12 @@ const membersList = document.getElementById("members");
 let currentRoom = null;
 let username = prompt("Enter your username:") || "Anonymous";
 
+// --- Create Room ---
 createBtn.onclick = () => {
     socket.emit("create_room", { username });
 };
 
+// --- Join Room ---
 joinBtn.onclick = () => {
     const code = roomInput.value.trim().toUpperCase();
     if (code) {
@@ -24,6 +26,7 @@ joinBtn.onclick = () => {
     }
 };
 
+// --- Send Message ---
 sendBtn.onclick = () => {
     if (!currentRoom) return alert("Join or create a room first!");
     const text = input.value.trim();
@@ -33,7 +36,7 @@ sendBtn.onclick = () => {
     }
 };
 
-// Handle messages
+// --- Handle Messages from Server ---
 socket.on("message", msg => {
     if (typeof msg === "object" && msg.action) {
         if (msg.action === "room_created") {
@@ -52,7 +55,7 @@ socket.on("message", msg => {
     }
 });
 
-// Handle member list updates
+// --- Update Members Sidebar ---
 socket.on("members", members => {
     membersList.innerHTML = "";
     members.forEach(m => {
