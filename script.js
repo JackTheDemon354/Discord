@@ -12,7 +12,6 @@ const usernameInput = document.getElementById("username");
 
 let currentRoom = null;
 let username = "";
-const userColors = {}; // Assign a color to each user
 
 // --- Enter key sends message ---
 input.addEventListener("keydown", (e) => {
@@ -59,51 +58,10 @@ socket.on("message", msg => {
         } else if(msg.action === "error"){
             alert(msg.msg);
         }
-    } else if(typeof msg === "string"){
-        displayMessage(msg);
+    } else if(typeof msg === "object"){
+        addMessage(msg.username, msg.text, msg.time);
     }
 });
-
-// --- Display message in WhatsApp style ---
-function displayMessage(msgText){
-    const [msgUser, ...msgParts] = msgText.split(":");
-    const message = msgParts.join(":").trim();
-
-    // Assign a color to the user if not already
-    if(!userColors[msgUser]){
-        userColors[msgUser] = msgUser === username ? "#DCF8C6" : "#FFFFFF"; // WhatsApp green or white
-    }
-
-    const p = document.createElement("div");
-    p.classList.add("message");
-    p.style.backgroundColor = userColors[msgUser];
-    p.style.alignSelf = msgUser === username ? "flex-end" : "flex-start";
-
-    // Username (for others, not for self)
-    if(msgUser !== username){
-        const nameDiv = document.createElement("div");
-        nameDiv.classList.add("msg-username");
-        nameDiv.textContent = msgUser;
-        p.appendChild(nameDiv);
-    }
-
-    // Message text
-    const textDiv = document.createElement("div");
-    textDiv.classList.add("msg-text");
-    textDiv.textContent = message;
-    p.appendChild(textDiv);
-
-    // Timestamp
-    const ts = document.createElement("div");
-    ts.classList.add("timestamp");
-    const now = new Date();
-    ts.textContent = now.getHours().toString().padStart(2,"0") + ":" +
-                     now.getMinutes().toString().padStart(2,"0");
-    p.appendChild(ts);
-
-    chat.appendChild(p);
-    chat.scrollTop = chat.scrollHeight;
-}
 
 // --- Update sidebar users ---
 function updateUsers(users){
@@ -113,4 +71,13 @@ function updateUsers(users){
         li.textContent = u;
         usersList.appendChild(li);
     });
+}
+
+// --- WhatsApp-style message ---
+function addMessage(sender, text, time){
+    const bubble = document.createElement("div");
+    bubble.className = "message-bubble " + (sender === username ? "mine" : "theirs");
+    bubble.innerHTML = `<span class="text">${text}</span><span class="time">${time}</span>`;
+    chat.appendChild(bubble);
+    chat.scrollTop = chat.scrollHeight;
 }
