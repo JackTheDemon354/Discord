@@ -6,19 +6,22 @@ import random
 import string
 from flask import Flask, send_file
 from flask_socketio import SocketIO, send, join_room, leave_room
+from datetime import datetime
 
 # --- Flask app ---
-app = Flask(__name__, static_folder=".", static_url_path="")
+app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "SUPER_SECRET_KEY")
+
+# Absolute path to root folder
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # --- Socket.IO setup ---
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 active_rooms = {}  # room_code: list of usernames
 
-# --- Routes ---
 @app.route("/")
 def index():
-    return send_file("index.html")  # serve index.html directly
+    return send_file(os.path.join(ROOT_DIR, "index.html"))
 
 # --- Socket.IO events ---
 @socketio.on("create_room")
@@ -46,11 +49,12 @@ def handle_message(msg):
     text = msg.get("text")
     username = msg.get("username", "Guest")
     if room in active_rooms:
-        send(f"{username}: {text}", room=room)
+        timestamp = datetime.now().strftime("%H:%M")
+        send({"username": username, "text": text, "time": timestamp}, room=room)
 
 @socketio.on("disconnect")
 def handle_disconnect():
-    # Optional: remove user from all rooms if you track sockets
+    # Optional: remove user from all rooms
     pass
 
 # --- Run server ---
